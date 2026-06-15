@@ -83,7 +83,7 @@ workflow running. After it finishes you can add a status badge to the README:
 The project is already deployment-ready. These files do the work:
 
 - **`Procfile`** — `release:` runs migrations + `collectstatic`; `web:` starts Gunicorn.
-- **`runtime.txt`** — pins Python 3.12.
+- **`runtime.txt`** — pins Python 3.13.5.
 - **`requirements.txt`** — includes `gunicorn`, `whitenoise`, `dj-database-url`, `psycopg2-binary`.
 - **`settings.py`** — reads `DATABASE_URL`, `RAILWAY_PUBLIC_DOMAIN`, and the secret/host
   env vars automatically. WhiteNoise serves the static files, so no S3 is needed.

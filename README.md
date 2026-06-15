@@ -14,23 +14,41 @@ and check out online; Pingu manages everything from a private owner dashboard.
 
 ## Screenshots
 
-> Replace each placeholder below with your own screenshot. In Markdown, drop the
-> image file into `docs/screenshots/` and the captions will render automatically.
+### Database schema / ERD diagram
+![Database schema (ERD)](docs/screenshots/00-erd.png)
 
-| Screen | Screenshot |
-|--------|------------|
-| Database schema / ERD diagram | `![Database schema (ERD)](docs/screenshots/00-erd.png)`  |
-| Home (hero + featured dish) | `![Home page](docs/screenshots/01-home.png)` |
-| Recipes + live search | `![Recipes with search](docs/screenshots/02-recipes-search.png)` |
-| Recipe detail | `![Recipe detail](docs/screenshots/03-recipe-detail.png)` |
-| Menu (printable price list) | `![Menu](docs/screenshots/04-menu.png)`  |
-| Cart + checkout | `![Cart and checkout](docs/screenshots/05-cart-checkout.png)`  |
-| Contact page | `![Contact](docs/screenshots/06-contact.png)` |
-| Owner login | `![Login](docs/screenshots/07-login.png)`  |
-| Owner dashboard (inventory/orders/finance) | `![Dashboard](docs/screenshots/08-dashboard.png)`  |
-| Add / edit a recipe (CRUD) | `![Recipe form](docs/screenshots/09-recipe-form.png)`  |
-| Mobile / responsive view | `![Mobile view](docs/screenshots/10-mobile.png)` |
-| Unit tests passing (`manage.py test`) | `![Test run](docs/screenshots/11-tests.png)`  |
+### Home (hero + featured dish)
+![Home page](docs/screenshots/01-home.png)
+
+### Recipes + live search
+![Recipes with search](docs/screenshots/02-recipes-search.png)
+
+### Recipe detail
+![Recipe detail](docs/screenshots/03-recipe-detail.png)
+
+### Menu (printable price list)
+![Menu](docs/screenshots/04-menu.png)
+
+### Cart + checkout
+![Cart and checkout](docs/screenshots/05-cart-checkout.png)
+
+### Contact page
+![Contact](docs/screenshots/06-contact.png)
+
+### Owner login
+![Login](docs/screenshots/07-login.png)
+
+### Owner dashboard (inventory / orders / finance)
+![Dashboard](docs/screenshots/08-dashboard.png)
+
+### Add / edit a recipe (CRUD)
+![Recipe form](docs/screenshots/09-recipe-form.png)
+
+### Mobile / responsive view
+![Mobile view](docs/screenshots/10-mobile.png)
+
+### Unit tests passing (`manage.py test`)
+![Test run](docs/screenshots/11-tests.png)
 
 ## Quick start
 
@@ -148,7 +166,7 @@ pengueats/
 docs/screenshots/           # <- put your README screenshots here
 ```
 
-## Architecture highlights (good practices to mention in the exam)
+## Architecture highlights (good practices)
 - **Separation of concerns**: business rules live in `services.py`, not in views.
 - **Atomic transactions**: `place_order` is all-or-nothing, so inventory never
   ends up half-updated even if an order fails.
@@ -166,3 +184,5 @@ docs/screenshots/           # <- put your README screenshots here
 - **Mobile-first responsiveness**: wide data tables collapse into labelled cards
   on small screens using `data-label` attributes + CSS `::before`, so nothing
   overflows on a phone.
+
+  [PenguEats — CI & Railway deploy pipeline](docs/screenshots/00-deploy.svg)
