@@ -1,0 +1,11 @@
+# PenguEats dependencies. Install with:  pip install -r requirements.txt
+Django>=5.0,<6.0
+djangorestframework>=3.15
+Pillow>=10.0          # required by Recipe.photo (ImageField) for uploads
+stripe>=9.0           # online checkout / card payments (Stripe test mode)
+
+# --- Production / deployment (Railway) ---
+gunicorn>=22.0        # production WSGI server
+whitenoise>=6.6       # serves static files straight from the app (no S3 needed)
+dj-database-url>=2.1  # reads Railway's DATABASE_URL into Django's DATABASES
+psycopg2-binary>=2.9  # PostgreSQL driver (Railway's managed database)

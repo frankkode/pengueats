@@ -1,0 +1,65 @@
+{% extends "restaurant/base.html" %}
+{% comment %}
+  Checkout: collect the animal's details, then hand off to Stripe Checkout
+  (test mode). The order summary mirrors the basket so prices are consistent.
+{% endcomment %}
+{% block title %}Checkout — PenguEats{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="row-head">
+    <h2>Check <span class="accent">out</span> <svg class="ic"><use href="#ic-dollar"></use></svg></h2>
+    <a href="{% url 'restaurant:cart' %}" class="owner-btn ghost"><svg class="ic"><use href="#ic-cart"></use></svg>Back to basket</a>
+  </div>
+
+  {% if messages %}
+    <div class="flash">
+      {% for m in messages %}
+        <div class="flash-item {% if m.tags == 'error' %}flash-bad{% else %}flash-ok{% endif %}">{{ m }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <div class="checkout-layout">
+    <div class="panel">
+      <h3>Who's ordering?</h3>
+      <form method="post" action="{% url 'restaurant:checkout' %}" class="actform col">
+        {% csrf_token %}
+        <label>Your name
+          <input type="text" name="name" required autofocus placeholder="e.g. Ola the Walrus">
+        </label>
+        <label>Species <span class="field-hint">(optional — helps Pingu greet you)</span>
+          <input type="text" name="species" placeholder="Walrus">
+        </label>
+        <label>Email <span class="field-hint">(optional — for your receipt)</span>
+          <input type="email" name="email" placeholder="ola@iceberg.aq">
+        </label>
+        <button type="submit" class="act-btn">
+          <svg class="ic"><use href="#ic-dollar"></use></svg>
+          {% if stripe_enabled %}Pay with card{% else %}Continue to payment{% endif %}
+        </button>
+        <p class="auth-hint">
+          {% if stripe_enabled %}
+            Secure payment by Stripe. Test card <code>4242 4242 4242 4242</code>, any future date &amp; CVC.
+          {% else %}
+            Demo mode: no real payment is taken.
+          {% endif %}
+        </p>
+      </form>
+    </div>
+
+    <div class="panel order-summary">
+      <h3>Order summary</h3>
+      <div class="sum-lines">
+        {% for row in rows %}
+        <div class="sum-line">
+          <span>{{ row.quantity }} × {{ row.recipe.name }}</span>
+          <span>${{ row.line_total }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="sum-total"><span>Total</span><span>${{ cart_total }}</span></div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends "restaurant/base.html" %}
+{% load static %}
+{% block title %}{{ recipe.name }} — PenguEats{% endblock %}
+{% block content %}
+
+<!-- ===== Recipe hero ===== -->
+<section class="detail-hero">
+  <div>
+    <div class="kicker">Let’s Cook</div>
+    <h1>{{ recipe.name }}</h1>
+    {% if recipe.summary %}<p class="recipe-lead">{{ recipe.summary }}</p>{% endif %}
+    <p style="margin-top:18px;">
+      {% if can_make %}
+        <span class="instock yes"><svg class="ic"><use href="#ic-check"></use></svg> In stock — ready to cook</span>
+      {% else %}
+        <span class="instock no"><svg class="ic"><use href="#ic-alert"></use></svg> Low stock — restock needed</span>
+      {% endif %}
+    </p>
+
+    <!-- Price + add to basket. Freshness markdown shows as a struck-through was-price. -->
+    <div class="buy-box">
+      <div class="buy-price">
+        {% if recipe.is_discounted %}
+          <span class="price-now big">${{ recipe.current_price }}</span>
+          <span class="price-was">${{ recipe.price }}</span>
+          <span class="deal-tag"><svg class="ic"><use href="#ic-tag"></use></svg>{{ recipe.freshness_deal_label }}</span>
+        {% else %}
+          <span class="price-now big">${{ recipe.price }}</span>
+        {% endif %}
+      </div>
+      <form method="post" action="{% url 'restaurant:add_to_cart' recipe.pk %}" class="buy-form">
+        {% csrf_token %}
+        <input type="number" name="quantity" value="1" min="1" max="20" aria-label="Quantity">
+        <button type="submit" class="act-btn"><svg class="ic"><use href="#ic-cart"></use></svg>Add to basket</button>
+      </form>
+    </div>
+  </div>
+  <div class="hero-img"><img src="{{ recipe.display_image }}" alt="{{ recipe.name }}"></div>
+</section>
+
+<!-- ===== Quick facts ===== -->
+<div class="facts">
+  <div class="fact"><div class="ico"><svg class="ic"><use href="#ic-globe"></use></svg></div><div><div class="lbl">Cuisine</div><div class="val">{{ recipe.get_category_display }}</div></div></div>
+  <div class="fact"><div class="ico"><svg class="ic"><use href="#ic-users"></use></svg></div><div><div class="lbl">Servings</div><div class="val">{{ recipe.servings }} Persons</div></div></div>
+  <div class="fact"><div class="ico"><svg class="ic"><use href="#ic-clock"></use></svg></div><div><div class="lbl">Prep Time</div><div class="val">{{ recipe.prep_minutes }} Min</div></div></div>
+  <div class="fact"><div class="ico"><svg class="ic"><use href="#ic-flame"></use></svg></div><div><div class="lbl">Cook Time</div><div class="val">{{ recipe.cook_minutes }} Min</div></div></div>
+  <div class="fact"><div class="ico"><svg class="ic"><use href="#ic-star"></use></svg></div><div><div class="lbl">Difficulty</div><div class="val">{{ recipe.get_difficulty_display }}</div></div></div>
+</div>
+
+<p style="color:#444;line-height:1.7;max-width:760px;">{{ recipe.description }}</p>
+
+<!-- ===== Ingredients + nutrition-style facts ===== -->
+<div class="two-col">
+  <div class="panel">
+    <h3>Ingredients</h3>
+    <div class="ingredients">
+      {% for line in recipe.recipe_ingredients.all %}
+        <div>• {{ line.quantity_kg }} kg {{ line.fish.name }}</div>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="panel nutri">
+    <h3>Recipe Info</h3>
+    <div><span>Menu price</span><span>${{ recipe.price }}</span></div>
+    <div><span>Total time</span><span>{{ recipe.total_minutes }} min</span></div>
+    <div><span>Servings</span><span>{{ recipe.servings }}</span></div>
+    <div><span>Chef</span><span>{{ recipe.chef.name|default:"PenguEats" }}</span></div>
+    <div><span>Views</span><span>{{ recipe.views }}</span></div>
+  </div>
+</div>
+
+<!-- ===== Cooking instructions ===== -->
+<section class="section">
+  <div class="row-head"><h2>Cooking <span class="accent">Instructions</span></h2></div>
+  <div class="steps">
+    {% for step in recipe.instruction_steps %}
+    <div class="step"><div class="n">0{{ forloop.counter }}</div><div>{{ step }}</div></div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- ===== Related ===== -->
+{% if related %}
+<section class="section">
+  <div class="row-head"><h2>You may also <span class="accent">like</span></h2></div>
+  <div class="grid-3">
+    {% for r in related %}
+    <article class="recipe-card">
+      <div class="body"><h3>{{ r.name }}</h3><div class="meta"><svg class="ic"><use href="#ic-clock"></use></svg>{{ r.total_minutes }} min</div></div>
+      <div class="thumb"><img src="{{ r.display_image }}" alt="{{ r.name }}"></div>
+      <a class="cta" href="{% url 'restaurant:recipe_detail' r.slug %}">See Complete Recipe</a>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% endblock %}

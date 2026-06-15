@@ -1,0 +1,316 @@
+{% extends "restaurant/base.html" %}
+{% comment %}
+  Pingu's Owner Dashboard — the private, *interactive* management console.
+  It doesn't just display data: Pingu actually runs the restaurant from here.
+  The five functions from the project brief:
+    1. Manage inventory  -> restock + change freshness (forms on each fish row)
+    2. Handle orders     -> "Take an order" form (deducts stock automatically)
+    3. Track profit/exp. -> KPI row + "Log an expense" form
+    4. Suggest recipes   -> "Can cook right now" (live from current stock)
+    5. Learn preferences -> updates by itself every time an order is placed
+{% endcomment %}
+{% block title %}Owner Dashboard — PenguEats{% endblock %}
+
+{% block content %}
+
+<!-- ===== Header ===== -->
+<div class="dash-hero">
+  <div>
+    <h1><svg class="ic"><use href="#ic-grid"></use></svg>Pingu's Control Deck</h1>
+    <p>Run PenguEats from one screen — restock fish, take customer orders,
+       log costs, and watch profit and customer tastes update live.</p>
+  </div>
+  <div class="pill">{{ order_count }} orders · {{ customer_count }} customers</div>
+</div>
+
+<!-- ===== New online-order notifications (the bell) ===== -->
+{% if new_orders %}
+<div class="notify-banner">
+  <div class="notify-head">
+    <span class="bell"><svg class="ic"><use href="#ic-bell"></use></svg><span class="bell-count">{{ new_orders|length }}</span></span>
+    <strong>{{ new_orders|length }} new paid order{{ new_orders|length|pluralize }}</strong> just came in from the website.
+    <form method="post" action="{% url 'restaurant:mark_orders_seen' %}" style="margin:0;">
+      {% csrf_token %}
+      <button type="submit" class="act-btn sm"><svg class="ic"><use href="#ic-check"></use></svg>Mark all seen</button>
+    </form>
+  </div>
+  <div class="notify-list">
+    {% for o in new_orders %}
+    <div class="notify-item">
+      <div>
+        <strong>Order #{{ o.pk }}</strong> — {{ o.customer.name }}{% if o.customer.species %} the {{ o.customer.species }}{% endif %}
+        <span class="notify-items-text">
+          {% for item in o.items.all %}{{ item.quantity }}× {{ item.recipe.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+        </span>
+      </div>
+      <div class="notify-total">${{ o.total }} <span class="paid-chip"><svg class="ic"><use href="#ic-check"></use></svg>Paid</span></div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- ===== Flash messages (action feedback) ===== -->
+{% if messages %}
+  <div class="flash">
+    {% for m in messages %}
+      <div class="flash-item {% if m.tags == 'error' %}flash-bad{% else %}flash-ok{% endif %}">{{ m }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<!-- ===== 3. Profit & expenses (KPI row) ===== -->
+<div class="kpis">
+  <div class="kpi accent"><div class="v">${{ finance.revenue }}</div><div class="l">Revenue</div></div>
+  <div class="kpi warn"><div class="v">${{ finance.expenses }}</div><div class="l">Expenses</div></div>
+  <div class="kpi good"><div class="v">${{ finance.profit }}</div><div class="l">Profit</div></div>
+  <div class="kpi"><div class="v">{{ finance.margin_pct|floatformat:0 }}%</div><div class="l">Profit margin</div></div>
+</div>
+
+<!-- ===== 2. Take a customer order (functions 2 + 5) ===== -->
+<div class="panel">
+  <h3><svg class="ic"><use href="#ic-receipt"></use></svg>Take a Customer Order</h3>
+  <p class="sub">Place an order for a visiting animal. Stock is deducted automatically,
+     revenue is recorded, and the customer's taste preference is learned. If any fish
+     is short, the whole order is rejected and nothing changes.</p>
+  <form method="post" action="{% url 'restaurant:place_order' %}" class="actform">
+    {% csrf_token %}
+    <label>Customer
+      <select name="customer_id" required>
+        {% for c in all_customers %}<option value="{{ c.pk }}">{{ c.name }}{% if c.species %} ({{ c.species }}){% endif %}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Dish
+      <select name="recipe_id" required>
+        <option value="">— choose —</option>
+        {% for r in all_recipes %}<option value="{{ r.pk }}">{{ r.name }} — ${{ r.price }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Qty
+      <input type="number" name="quantity" value="1" min="1" max="20" style="width:70px;">
+    </label>
+    <button type="submit" class="act-btn">Place order</button>
+  </form>
+</div>
+
+<!-- ===== Manage the menu: add a new recipe ===== -->
+<div class="panel">
+  <h3><svg class="ic"><use href="#ic-chef"></use></svg>Add a Recipe to the Menu</h3>
+  <p class="sub">Create a new dish. Leave the slug blank and it's generated from
+     the name automatically. New recipes appear on the public menu right away.</p>
+  <form method="post" action="{% url 'restaurant:create_recipe' %}" enctype="multipart/form-data" class="actform recipe-form">
+    {% csrf_token %}
+    <label>Name
+      {{ recipe_form.name }}
+      {% if recipe_form.name.errors %}<span class="field-err">{{ recipe_form.name.errors.0 }}</span>{% endif %}
+    </label>
+    <label>Slug
+      {{ recipe_form.slug }}
+      {% if recipe_form.slug.errors %}<span class="field-err">{{ recipe_form.slug.errors.0 }}</span>{% endif %}
+    </label>
+    <label>Category {{ recipe_form.category }}</label>
+    <label>Difficulty {{ recipe_form.difficulty }}</label>
+    <label>Price ($) {{ recipe_form.price }}
+      {% if recipe_form.price.errors %}<span class="field-err">{{ recipe_form.price.errors.0 }}</span>{% endif %}
+    </label>
+    <label>Prep (min) {{ recipe_form.prep_minutes }}</label>
+    <label>Cook (min) {{ recipe_form.cook_minutes }}</label>
+    <label>Servings {{ recipe_form.servings }}</label>
+    <label class="full">Summary {{ recipe_form.summary }}</label>
+    <label class="full">Photo {{ recipe_form.photo }}
+      {% if recipe_form.photo.errors %}<span class="field-err">{{ recipe_form.photo.errors.0 }}</span>{% endif %}
+      <span class="field-hint">Upload a JPG or PNG. Leave empty to use no image.</span>
+    </label>
+    <div class="ingredients-block full">
+      <span class="ing-title">Fish this recipe uses <span class="field-hint">— set kg per order for each fish needed. This is what makes orders deduct inventory.</span></span>
+      <div class="ing-grid">
+        {% for row in ingredient_rows %}
+          <label class="ing-row">{{ row.fish.name }}
+            <input type="number" name="ing_{{ row.fish.pk }}" value="{{ row.kg }}" min="0" step="0.05" placeholder="kg">
+          </label>
+        {% endfor %}
+      </div>
+    </div>
+    <label class="inline">{{ recipe_form.is_featured }} Feature on home page</label>
+    <button type="submit" class="act-btn">Add recipe</button>
+  </form>
+</div>
+
+<!-- ===== Manage the menu: edit / delete existing recipes (CRUD) ===== -->
+<div class="panel">
+  <h3><svg class="ic"><use href="#ic-list"></use></svg>Manage Recipes</h3>
+  <p class="sub">Every dish on the menu. Edit its text or photo, or remove it.</p>
+  <table class="dtable">
+    <thead>
+      <tr><th></th><th>Recipe</th><th>Category</th><th class="num">Price</th><th>Manage</th></tr>
+    </thead>
+    <tbody>
+    {% for r in all_recipes %}
+      <tr>
+        <td data-label="Photo"><img src="{{ r.display_image }}" alt="{{ r.name }}" class="row-thumb"></td>
+        <td data-label="Recipe"><strong>{{ r.name }}</strong>{% if r.is_featured %}<br><span class="chip chip-status">Featured</span>{% endif %}</td>
+        <td data-label="Category">{{ r.get_category_display }}</td>
+        <td class="num" data-label="Price">${{ r.price }}</td>
+        <td data-label="Manage">
+          <div class="row-actions">
+            <a class="act-btn sm" href="{% url 'restaurant:edit_recipe' r.pk %}">Edit</a>
+            <form method="post" action="{% url 'restaurant:delete_recipe' r.pk %}" class="mini"
+                  onsubmit="return confirm('Delete “{{ r.name|escapejs }}” from the menu?');">
+              {% csrf_token %}
+              <button type="submit" class="act-btn sm danger">Delete</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="5" style="color:var(--muted);">No recipes yet — add one above.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="dash-grid">
+
+  <!-- LEFT COLUMN -->
+  <div>
+
+    <!-- ===== 1. Inventory (with inline restock + freshness) ===== -->
+    <div class="panel">
+      <h3><svg class="ic"><use href="#ic-fish"></use></svg>Fish Inventory</h3>
+      <p class="sub">Type, quantity (kg) and freshness. Restock or re-grade any fish right here.</p>
+      <table class="dtable">
+        <thead>
+          <tr><th>Fish</th><th>Freshness</th><th class="num">Stock</th><th>Restock</th></tr>
+        </thead>
+        <tbody>
+        {% for f in fish %}
+          <tr>
+            <td data-label="Fish"><strong>{{ f.name }}</strong>{% if f.species %}<br><span style="color:var(--muted);font-size:11.5px;">{{ f.species }}</span>{% endif %}</td>
+            <td data-label="Freshness">
+              <form method="post" action="{% url 'restaurant:update_freshness' %}" class="mini">
+                {% csrf_token %}
+                <input type="hidden" name="fish_id" value="{{ f.pk }}">
+                <select name="freshness" onchange="this.form.submit()" class="chip-select chip-{{ f.freshness|lower }}">
+                  {% for val, label in f.Freshness.choices %}
+                    <option value="{{ val }}" {% if f.freshness == val %}selected{% endif %}>{{ label }}</option>
+                  {% endfor %}
+                </select>
+              </form>
+            </td>
+            <td class="num" data-label="Stock">
+              {{ f.quantity_kg }} kg
+              {% if f.is_low_stock %}<br><span class="chip chip-low">Low</span>{% endif %}
+            </td>
+            <td data-label="Restock">
+              <form method="post" action="{% url 'restaurant:restock' %}" class="mini">
+                {% csrf_token %}
+                <input type="hidden" name="fish_id" value="{{ f.pk }}">
+                <input type="number" name="kilograms" value="5" min="1" step="1" style="width:58px;">
+                <button type="submit" class="act-btn sm">+ kg</button>
+              </form>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4" style="color:var(--muted);">No fish yet — run <code>seed_data</code>.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ===== 2. Customer orders list ===== -->
+    <div class="panel">
+      <h3><svg class="ic"><use href="#ic-list"></use></svg>Recent Orders</h3>
+      <p class="sub">Orders placed by visiting animals, newest first.</p>
+      <table class="dtable">
+        <thead>
+          <tr><th>#</th><th>Customer</th><th>Dishes</th><th>Channel</th><th>Status</th><th class="num">Total</th></tr>
+        </thead>
+        <tbody>
+        {% for o in recent_orders %}
+          <tr class="{% if o.is_new_for_owner %}row-new{% endif %}">
+            <td data-label="#">{{ o.pk }}{% if o.is_new_for_owner %} <span class="new-dot" title="New">●</span>{% endif %}</td>
+            <td data-label="Customer">{{ o.customer.name }}</td>
+            <td data-label="Dishes">{% for item in o.items.all %}{{ item.quantity }}× {{ item.recipe.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+            <td data-label="Channel">{% if o.is_online %}<span class="chip chip-online"><svg class="ic"><use href="#ic-cart"></use></svg>Online{% if o.is_paid %} · paid{% endif %}</span>{% else %}<span class="chip">Counter</span>{% endif %}</td>
+            <td data-label="Status"><span class="chip chip-status">{{ o.get_status_display }}</span></td>
+            <td class="num" data-label="Total">${{ o.total }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" style="color:var(--muted);">No orders yet.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- RIGHT COLUMN -->
+  <div>
+
+    <!-- ===== 3. Log an expense ===== -->
+    <div class="panel">
+      <h3><svg class="ic"><use href="#ic-dollar"></use></svg>Log an Expense</h3>
+      <p class="sub">Record money going out — ice-block rent, supplier bills, utilities. It feeds straight into profit.</p>
+      <form method="post" action="{% url 'restaurant:add_expense' %}" class="actform col">
+        {% csrf_token %}
+        <label>Type
+          <select name="category" required>
+            {% for val, label in expense_categories %}<option value="{{ val }}">{{ label }}</option>{% endfor %}
+          </select>
+        </label>
+        <label>Amount ($)
+          <input type="number" name="amount" min="0.01" step="0.01" placeholder="0.00" required>
+        </label>
+        <label>Note
+          <input type="text" name="description" placeholder="e.g. June ice rent" maxlength="200">
+        </label>
+        <button type="submit" class="act-btn">Add expense</button>
+      </form>
+    </div>
+
+    <!-- ===== 4. Recipe suggestions ===== -->
+    <div class="panel">
+      <h3><svg class="ic"><use href="#ic-chef"></use></svg>Can Cook Right Now</h3>
+      <p class="sub">Recipes whose every ingredient is in stock. Updates as you sell and restock.</p>
+      {% if suggestions %}
+      <div class="sugg">
+        {% for r in suggestions %}<a href="{% url 'restaurant:recipe_detail' r.slug %}">{{ r.name }}</a>{% endfor %}
+      </div>
+      {% else %}
+        <p style="color:var(--muted);">Nothing can be cooked — restock the low fish.</p>
+      {% endif %}
+    </div>
+
+    <!-- ===== Low-stock reorder ===== -->
+    <div class="panel">
+      <h3><svg class="ic"><use href="#ic-alert"></use></svg>Reorder Soon</h3>
+      <p class="sub">Below the 5 kg threshold.</p>
+      {% if low_stock %}
+      <table class="dtable"><tbody>
+        {% for f in low_stock %}<tr><td><strong>{{ f.name }}</strong></td><td class="num">{{ f.quantity_kg }} kg <span class="chip chip-low">Low</span></td></tr>{% endfor %}
+      </tbody></table>
+      {% else %}
+        <p style="color:#1a7f4b;font-weight:600;">All fish well stocked.</p>
+      {% endif %}
+    </div>
+
+    <!-- ===== 5. Learned preferences ===== -->
+    <div class="panel">
+      <h3><svg class="ic"><use href="#ic-heart"></use></svg>What Customers Love</h3>
+      <p class="sub">Learned automatically from every order placed.</p>
+      <table class="dtable"><tbody>
+        {% for p in preferences %}
+          <tr>
+            <td>{{ p.customer.name }}<br><span style="color:var(--muted);font-size:11.5px;">likes {{ p.get_category_display }}</span></td>
+            <td class="num"><div class="prefbar"><span style="width:{% widthratio p.score 5 100 %}%;"></span></div></td>
+          </tr>
+        {% empty %}
+          <tr><td style="color:var(--muted);">No preferences learned yet.</td></tr>
+        {% endfor %}
+      </tbody></table>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

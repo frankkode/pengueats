@@ -1,0 +1,69 @@
+{% extends "restaurant/base.html" %}
+{% comment %}
+  Owner-only recipe editor (menu CRUD: Update). Pre-filled with the recipe's
+  current text and photo; ticking the photo "Clear" box removes the image.
+{% endcomment %}
+{% block title %}Edit {{ recipe.name }} — PenguEats{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="row-head">
+    <h2>Edit <span class="accent">Recipe</span> <svg class="ic"><use href="#ic-chef"></use></svg></h2>
+    <a href="{% url 'restaurant:dashboard' %}" class="owner-btn ghost"><svg class="ic"><use href="#ic-grid"></use></svg>Back to dashboard</a>
+  </div>
+
+  <div class="panel">
+    {% if messages %}
+      <div class="flash">
+        {% for m in messages %}
+          <div class="flash-item {% if m.tags == 'error' %}flash-bad{% else %}flash-ok{% endif %}">{{ m }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="edit-layout">
+      <div class="edit-preview">
+        <p class="sub">Current photo</p>
+        <img src="{{ recipe.display_image }}" alt="{{ recipe.name }}">
+      </div>
+
+      <form method="post" action="{% url 'restaurant:edit_recipe' recipe.pk %}" enctype="multipart/form-data" class="actform recipe-form">
+        {% csrf_token %}
+        <label>Name
+          {{ form.name }}
+          {% if form.name.errors %}<span class="field-err">{{ form.name.errors.0 }}</span>{% endif %}
+        </label>
+        <label>Slug
+          {{ form.slug }}
+          {% if form.slug.errors %}<span class="field-err">{{ form.slug.errors.0 }}</span>{% endif %}
+        </label>
+        <label>Category {{ form.category }}</label>
+        <label>Difficulty {{ form.difficulty }}</label>
+        <label>Price ($) {{ form.price }}
+          {% if form.price.errors %}<span class="field-err">{{ form.price.errors.0 }}</span>{% endif %}
+        </label>
+        <label>Prep (min) {{ form.prep_minutes }}</label>
+        <label>Cook (min) {{ form.cook_minutes }}</label>
+        <label>Servings {{ form.servings }}</label>
+        <label class="full">Summary {{ form.summary }}</label>
+        <label class="full">Photo {{ form.photo }}
+          {% if form.photo.errors %}<span class="field-err">{{ form.photo.errors.0 }}</span>{% endif %}
+          <span class="field-hint">Choose a new file to replace it, or tick “Clear” to remove the photo.</span>
+        </label>
+        <div class="ingredients-block full">
+          <span class="ing-title">Fish this recipe uses <span class="field-hint">— kg per order. Orders deduct these from inventory; set to blank/0 to remove.</span></span>
+          <div class="ing-grid">
+            {% for row in ingredient_rows %}
+              <label class="ing-row">{{ row.fish.name }}
+                <input type="number" name="ing_{{ row.fish.pk }}" value="{{ row.kg }}" min="0" step="0.05" placeholder="kg">
+              </label>
+            {% endfor %}
+          </div>
+        </div>
+        <label class="inline">{{ form.is_featured }} Feature on home page</label>
+        <button type="submit" class="act-btn">Save changes</button>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

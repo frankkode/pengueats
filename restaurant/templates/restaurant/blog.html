@@ -1,0 +1,42 @@
+{% extends "restaurant/base.html" %}
+{% load static %}
+{% block title %}Culinary Journal — PenguEats{% endblock %}
+{% block content %}
+
+<section class="detail-hero">
+  <div><h1>Discover<br><span class="accent">Culinary</span> Delights</h1></div>
+  <div class="hero-img"><img src="{% static 'restaurant/img/blog.jpg' %}" alt="Culinary journal"></div>
+</section>
+
+<section class="section">
+  <div class="row-head"><h2>Latest <span class="accent">Articles</span></h2></div>
+  <div class="blog-grid">
+    <!-- Feature article -->
+    {% with lead=articles.0 %}
+    <article class="article">
+      <div class="ph"><img src="{{ lead.display_image }}" alt="{{ lead.name }}"></div>
+      <div class="body">
+        <span class="cat" style="color:var(--orange);font-weight:700;font-size:12px;">STORY</span>
+        <h3>Savoring the Catch: {{ lead.name }}</h3>
+        <p style="color:var(--muted);">{{ lead.summary }}</p>
+        <a class="btn btn-dark" href="{% url 'restaurant:recipe_detail' lead.slug %}" style="margin-top:8px;">Read Article</a>
+      </div>
+    </article>
+    {% endwith %}
+    <!-- Aside list -->
+    <div>
+      {% for a in articles|slice:"1:6" %}
+      <a class="aside-card" href="{% url 'restaurant:recipe_detail' a.slug %}">
+        <div class="ph"><img src="{{ a.display_image }}" alt="{{ a.name }}"></div>
+        <div>
+          <div class="cat">{{ a.get_category_display }}</div>
+          <h4 style="margin:4px 0 0;font-size:15px;">{{ a.name }}</h4>
+          <p style="margin:4px 0 0;color:var(--muted);font-size:12px;">by {{ a.chef.name|default:"PenguEats" }}</p>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% endblock %}

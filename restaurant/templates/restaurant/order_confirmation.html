@@ -1,0 +1,27 @@
+{% extends "restaurant/base.html" %}
+{% comment %}
+  Shown after a successful payment. The order is now paid: inventory has been
+  deducted, the customer's taste learned, and Pingu's dashboard notified.
+{% endcomment %}
+{% block title %}Order confirmed — PenguEats{% endblock %}
+
+{% block content %}
+<section class="auth-wrap">
+  <div class="auth-card confirm-card">
+    <div class="confirm-tick"><svg class="ic"><use href="#ic-check"></use></svg></div>
+    <h1>Thanks, {{ order.customer.name }}!</h1>
+    <p class="sub">Your payment went through and Pingu has your order. He's been
+       pinged on the dashboard and is firing up the grill.</p>
+
+    <div class="confirm-summary">
+      <div class="confirm-num">Order #{{ order.pk }}</div>
+      {% for item in order.items.all %}
+        <div class="sum-line"><span>{{ item.quantity }} × {{ item.recipe.name }}</span><span>${{ item.line_total }}</span></div>
+      {% endfor %}
+      <div class="sum-total"><span>Paid</span><span>${{ order.total }}</span></div>
+    </div>
+
+    <a href="{% url 'restaurant:recipes' %}" class="act-btn full"><svg class="ic"><use href="#ic-utensils"></use></svg>Order something else</a>
+  </div>
+</section>
+{% endblock %}

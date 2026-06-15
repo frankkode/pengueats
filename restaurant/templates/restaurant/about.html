@@ -1,0 +1,41 @@
+{% extends "restaurant/base.html" %}
+{% load static %}
+{% block title %}About — PenguEats{% endblock %}
+{% block content %}
+
+<section class="detail-hero">
+  <div>
+    <h1>About Our<br><span class="accent">Culinary</span> Stories</h1>
+  </div>
+  <div class="hero-img"><img src="{% static 'restaurant/img/about.jpg' %}" alt="About PenguEats"></div>
+</section>
+
+<section class="section">
+  <div style="max-width:760px;">
+    <h2 style="font-size:34px;">We believe in the <span class="accent">transformative</span> power of cooking and good fish.</h2>
+    <p style="color:var(--muted);line-height:1.7;">PenguEats began on a single ice floe with one penguin, one pan, and a dream. Today our platform celebrates culinary diversity, bringing together home cooks and food enthusiasts from every corner of the ocean.</p>
+  </div>
+</section>
+
+<!-- ===== Live stats from the database ===== -->
+<div class="stats">
+  <div class="stat"><div class="num">{{ recipe_count }}+</div><div class="lbl">Recipes on the Menu</div></div>
+  <div class="stat"><div class="num">{{ fish_count }}</div><div class="lbl">Fresh Fish Varieties</div></div>
+  <div class="stat"><div class="num">{{ chef_count }}</div><div class="lbl">Expert Chefs</div></div>
+  <div class="stat"><div class="num">1M+</div><div class="lbl">Happy Customers</div></div>
+</div>
+
+<!-- ===== Chef team ===== -->
+<section class="section">
+  <div class="section-head"><h2>The Flavor <span class="accent">Chefs</span> and Team</h2></div>
+  <div class="team">
+    {% for chef in chefs %}
+    <div class="chef">
+      <div class="ph"><img src="{% static chef.photo %}" alt="{{ chef.name }}"></div>
+      <div class="body"><h4>{{ chef.name }}</h4><p>{{ chef.title }}</p></div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends "restaurant/base.html" %}
+{% load static %}
+{% block title %}Recipes — PenguEats{% endblock %}
+{% block content %}
+
+<section class="detail-hero" style="grid-template-columns:1fr 1fr;">
+  <div>
+    <h1>Explore<br><span class="accent">Culinary</span> Insights</h1>
+    <p class="kicker" style="margin-top:14px;">Every dish below is built from Pingu’s daily catch.</p>
+  </div>
+  <div class="hero-img"><img src="{% static 'restaurant/img/explore.jpg' %}" alt="Explore recipes"></div>
+</section>
+
+<section class="section">
+  <div class="section-head"><h2>What to <span class="accent">Cook</span>?</h2></div>
+  <div class="chips">
+    <a class="chip {% if not selected_category %}active{% endif %}" href="{% url 'restaurant:recipes' %}"><svg class="ic"><use href="#ic-utensils"></use></svg> All Types</a>
+    {% for value, label in categories %}
+      <a class="chip {% if selected_category == value %}active{% endif %}" href="?category={{ value }}">{{ label }}</a>
+    {% endfor %}
+  </div>
+
+  {% if query %}
+  <p class="search-note">Results for “<strong>{{ query }}</strong>” — <a href="{% url 'restaurant:recipes' %}">clear search</a></p>
+  {% endif %}
+
+  <div class="grid-3">
+    {% for r in recipes %}
+    <article class="recipe-card {% if r.is_featured %}featured{% endif %}">
+      <div class="body">
+        <h3>{{ r.name }}</h3>
+        {% if r.summary %}<p class="card-summary">{{ r.summary }}</p>{% endif %}
+        <div class="meta"><svg class="ic"><use href="#ic-eye"></use></svg>{{ r.views }}+ · <svg class="ic"><use href="#ic-clock"></use></svg>{{ r.total_minutes }} min</div>
+      </div>
+      <div class="thumb">
+        <img src="{{ r.display_image }}" alt="{{ r.name }}">
+        {% if r.is_discounted %}<span class="deal-flag"><svg class="ic"><use href="#ic-tag"></use></svg>-{{ r.discount_pct }}%</span>{% endif %}
+      </div>
+      <div class="pill-row">
+        <span class="badge">{{ r.get_difficulty_display }}</span>
+        <span class="badge">{{ r.get_category_display }}</span>
+      </div>
+      <div class="price-row">
+        {% if r.is_discounted %}
+          <span class="price-now">${{ r.current_price }}</span>
+          <span class="price-was">${{ r.price }}</span>
+        {% else %}
+          <span class="price-now">${{ r.price }}</span>
+        {% endif %}
+      </div>
+      <div class="card-actions">
+        <a class="cta ghost" href="{% url 'restaurant:recipe_detail' r.slug %}">Details</a>
+        <form method="post" action="{% url 'restaurant:add_to_cart' r.pk %}" style="margin:0;flex:1;">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.path }}">
+          <button type="submit" class="cta add-btn"><svg class="ic"><use href="#ic-cart"></use></svg>Add</button>
+        </form>
+      </div>
+    </article>
+    {% empty %}
+    {% if query %}
+    <p>No dishes match “{{ query }}”. Try another fish or dish name.</p>
+    {% else %}
+    <p>No recipes in this category yet.</p>
+    {% endif %}
+    {% endfor %}
+  </div>
+</section>
+
+{% endblock %}

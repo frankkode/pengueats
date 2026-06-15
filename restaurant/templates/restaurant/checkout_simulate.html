@@ -1,0 +1,31 @@
+{% extends "restaurant/base.html" %}
+{% comment %}
+  Fallback "payment" screen, shown ONLY when Stripe keys aren't configured so
+  the app still demos end-to-end. Clearly labelled as a simulation. The Pay
+  button posts to checkout_success, which finalises the pending order.
+{% endcomment %}
+{% block title %}Payment — PenguEats{% endblock %}
+
+{% block content %}
+<section class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-head">
+      <svg class="ic"><use href="#ic-dollar"></use></svg>
+      <h1>Confirm payment</h1>
+    </div>
+    <p class="sub">Demo mode — Stripe keys aren't configured, so this stands in for
+       the real card form. No money moves. Order <strong>#{{ order.pk }}</strong>
+       for <strong>{{ order.customer.name }}</strong>.</p>
+
+    <div class="sim-amount">${{ order.total }}</div>
+
+    <form method="post" action="{% url 'restaurant:checkout_success' %}" class="col">
+      {% csrf_token %}
+      <button type="submit" class="act-btn full"><svg class="ic"><use href="#ic-check"></use></svg>Pay ${{ order.total }}</button>
+    </form>
+    <p class="auth-hint">To take real test payments, set <code>STRIPE_SECRET_KEY</code>
+       and <code>STRIPE_PUBLISHABLE_KEY</code> and use card <code>4242 4242 4242 4242</code>.</p>
+    <p class="auth-hint"><a href="{% url 'restaurant:checkout_cancel' %}">Cancel</a></p>
+  </div>
+</section>
+{% endblock %}

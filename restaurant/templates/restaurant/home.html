@@ -1,0 +1,113 @@
+{% extends "restaurant/base.html" %}
+{% load static %}
+{% block content %}
+
+<!-- ===== Hero ===== -->
+<section class="hero">
+  <div>
+    <h1>Adventure<br>of <span class="accent">Delicacies</span></h1>
+    <p>Unlock a world of variety culinary recipes and unleash your inner chef the easy way with PenguEats.</p>
+    <div class="hero-cta">
+      <a class="btn btn-dark" href="{% url 'restaurant:recipes' %}">Explore Recipes</a>
+      <a class="btn btn-light" href="{% url 'restaurant:menu' %}">Download Menu <svg class="ic"><use href="#ic-download"></use></svg></a>
+    </div>
+  </div>
+  <div class="hero-img">
+    <img src="{% static 'restaurant/img/hero.jpg' %}" alt="Signature fish dish">
+  </div>
+</section>
+
+<!-- ===== Feature strip ===== -->
+<div class="features">
+  <div class="feature"><div class="ico"><svg class="ic"><use href="#ic-user"></use></svg></div><h4>User-Centered</h4><p>Your feedback shapes our platform, ensuring a seamless and satisfying culinary journey.</p></div>
+  <div class="feature"><div class="ico"><svg class="ic"><use href="#ic-globe"></use></svg></div><h4>Diverse Recipes</h4><p>We celebrate diverse culinary traditions from across the ocean, inspiring you today.</p></div>
+  <div class="feature"><div class="ico"><svg class="ic"><use href="#ic-heart"></use></svg></div><h4>Fun Community</h4><p>We foster a vibrant foodie community where joy comes from sharing recipes.</p></div>
+  {% if featured %}
+  <div class="featured-card">
+    <div class="tag">FEATURED</div>
+    <h4>{{ featured.name }}</h4>
+    <a class="accent" style="font-weight:600;font-size:13px;" href="{% url 'restaurant:recipe_detail' featured.slug %}">See Recipe →</a>
+  </div>
+  {% endif %}
+</div>
+
+<!-- ===== Become a true chef ===== -->
+<section class="section">
+  <div class="section-head">
+    <h2>Become a true <span class="accent">chef</span><br>with our recipes.</h2>
+    <p>We are home to a variety of fish recipes worldwide for you to learn.</p>
+  </div>
+</section>
+
+<!-- ===== Cookable right now (recipe-suggestion engine) ===== -->
+<section class="section">
+  <div class="row-head">
+    <h2>Cookable <span class="accent">Right Now</span> <svg class="ic"><use href="#ic-fish"></use></svg></h2>
+    <span style="font-size:13px;color:var(--muted)">Based on today’s fresh catch in stock</span>
+  </div>
+  <div class="grid-3">
+    {% for r in in_stock %}
+    <article class="recipe-card {% if r.is_featured %}featured{% endif %}">
+      <div class="body">
+        <h3>{{ r.name }}</h3>
+        <div class="meta"><svg class="ic"><use href="#ic-clock"></use></svg>{{ r.total_minutes }} min · {{ r.get_difficulty_display }}</div>
+      </div>
+      <div class="thumb">
+        <img src="{{ r.display_image }}" alt="{{ r.name }}">
+        {% if r.is_discounted %}<span class="deal-flag"><svg class="ic"><use href="#ic-tag"></use></svg>-{{ r.discount_pct }}%</span>{% endif %}
+      </div>
+      <div class="price-row">
+        {% if r.is_discounted %}<span class="price-now">${{ r.current_price }}</span><span class="price-was">${{ r.price }}</span>
+        {% else %}<span class="price-now">${{ r.price }}</span>{% endif %}
+      </div>
+      <div class="card-actions">
+        <a class="cta ghost" href="{% url 'restaurant:recipe_detail' r.slug %}">Details</a>
+        <form method="post" action="{% url 'restaurant:add_to_cart' r.pk %}" style="margin:0;flex:1;">
+          {% csrf_token %}<input type="hidden" name="next" value="{{ request.path }}">
+          <button type="submit" class="cta add-btn"><svg class="ic"><use href="#ic-cart"></use></svg>Add</button>
+        </form>
+      </div>
+    </article>
+    {% empty %}
+    <p>No recipes can be made right now — time to restock the freezer!</p>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- ===== Popular today ===== -->
+<section class="section">
+  <div class="row-head"><h2>Popular <span class="accent">Recipes</span> Today</h2></div>
+  <div class="grid-3">
+    {% for r in popular %}
+    <article class="recipe-card">
+      <div class="body">
+        <h3>{{ r.name }}</h3>
+        <div class="meta"><svg class="ic"><use href="#ic-eye"></use></svg>{{ r.views }}+ views · {{ r.get_category_display }}</div>
+      </div>
+      <div class="thumb">
+        <img src="{{ r.display_image }}" alt="{{ r.name }}">
+        {% if r.is_discounted %}<span class="deal-flag"><svg class="ic"><use href="#ic-tag"></use></svg>-{{ r.discount_pct }}%</span>{% endif %}
+      </div>
+      <div class="price-row">
+        {% if r.is_discounted %}<span class="price-now">${{ r.current_price }}</span><span class="price-was">${{ r.price }}</span>
+        {% else %}<span class="price-now">${{ r.price }}</span>{% endif %}
+      </div>
+      <div class="card-actions">
+        <a class="cta ghost" href="{% url 'restaurant:recipe_detail' r.slug %}">Details</a>
+        <form method="post" action="{% url 'restaurant:add_to_cart' r.pk %}" style="margin:0;flex:1;">
+          {% csrf_token %}<input type="hidden" name="next" value="{{ request.path }}">
+          <button type="submit" class="cta add-btn"><svg class="ic"><use href="#ic-cart"></use></svg>Add</button>
+        </form>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- ===== Customer-facing banner (no owner financials shown publicly) ===== -->
+<div class="banner">
+  <h2>Fresh from the ice today</h2>
+  <p style="margin-top:8px;font-size:16px;">Caught fresh, cooked to order — come dine at PenguEats.</p>
+</div>
+
+{% endblock %}

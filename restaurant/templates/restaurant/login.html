@@ -1,0 +1,39 @@
+{% extends "restaurant/base.html" %}
+{% comment %}
+  Owner sign-in. Django's LoginView renders this with a bound `form`; on
+  success it sends Pingu to LOGIN_REDIRECT_URL (the dashboard).
+{% endcomment %}
+{% block title %}Owner Login — PenguEats{% endblock %}
+
+{% block content %}
+<section class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-head">
+      <svg class="ic"><use href="#ic-grid"></use></svg>
+      <h1>Owner Login</h1>
+    </div>
+    <p class="sub">Pingu's Control Deck is private. Sign in to manage inventory,
+       orders, finances and the menu.</p>
+
+    {% if form.errors %}
+      <div class="flash"><div class="flash-item flash-bad">
+        Wrong username or password. Please try again.
+      </div></div>
+    {% endif %}
+
+    <form method="post" action="{% url 'restaurant:login' %}" class="actform col">
+      {% csrf_token %}
+      <label>Username
+        <input type="text" name="username" autocomplete="username" required autofocus>
+      </label>
+      <label>Password
+        <input type="password" name="password" autocomplete="current-password" required>
+      </label>
+      <input type="hidden" name="next" value="{{ next }}">
+      <button type="submit" class="act-btn">Sign in</button>
+    </form>
+    <p class="auth-hint">No account yet? Create one! <br>
+       <code>Ask Admin</code>.</p>
+  </div>
+</section>
+{% endblock %}

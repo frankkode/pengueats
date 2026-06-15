@@ -1,0 +1,96 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}PenguEats — Adventure of Delicacies{% endblock %}</title>
+  <!-- Free Google Fonts, matching the rounded Flavoriz look -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'restaurant/css/style.css' %}">
+</head>
+<body>
+  {% comment %} Reusable inline SVG icon sprite — referenced via <svg class="ic"><use href="#ic-..."></use></svg>.
+     One definition, used across the whole site, so there are no emoji and no external icon font. {% endcomment %}
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <defs>
+      <symbol id="ic-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></symbol>
+      <symbol id="ic-fish" viewBox="0 0 24 24"><path d="M16.5 12c0-3-3.4-5.5-7.5-5.5S1.5 9 1.5 12s3.4 5.5 7.5 5.5 7.5-2.5 7.5-5.5z"/><path d="M16.5 12 22 8.5v7L16.5 12z"/><circle cx="6.5" cy="11" r=".6" fill="currentColor" stroke="none"/></symbol>
+      <symbol id="ic-receipt" viewBox="0 0 24 24"><path d="M5 3h14v18l-3-1.5L13 21l-3-1.5L7 21l-2-1.5z" stroke-linejoin="round"/><line x1="8.5" y1="8" x2="15.5" y2="8"/><line x1="8.5" y1="12" x2="15.5" y2="12"/></symbol>
+      <symbol id="ic-list" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></symbol>
+      <symbol id="ic-dollar" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></symbol>
+      <symbol id="ic-chef" viewBox="0 0 24 24"><path d="M6 20h12"/><path d="M7 20v-6"/><path d="M17 20v-6"/><path d="M7.5 14a4 4 0 0 1-1.2-7.8 4.6 4.6 0 0 1 8.4-1.6 4 4 0 0 1 2 7.4"/></symbol>
+      <symbol id="ic-alert" viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
+      <symbol id="ic-heart" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21.2l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></symbol>
+      <symbol id="ic-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
+      <symbol id="ic-user" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+      <symbol id="ic-users" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+      <symbol id="ic-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol>
+      <symbol id="ic-eye" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></symbol>
+      <symbol id="ic-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+      <symbol id="ic-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></symbol>
+      <symbol id="ic-flame" viewBox="0 0 24 24"><path d="M12 2c1 4-2 5-2 8a2 2 0 0 0 4 0c2 2 3 4 3 6a5 5 0 0 1-10 0c0-4 4-6 5-14z"/></symbol>
+      <symbol id="ic-star" viewBox="0 0 24 24"><polygon points="12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2"/></symbol>
+      <symbol id="ic-check" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></symbol>
+      <symbol id="ic-utensils" viewBox="0 0 24 24"><path d="M4 3v6a2 2 0 0 0 2 2h0a2 2 0 0 0 2-2V3"/><line x1="6" y1="11" x2="6" y2="21"/><path d="M17 3c-1.5 1-2.5 3-2.5 6 0 2 1 3 2.5 3V3z"/><line x1="17" y1="12" x2="17" y2="21"/></symbol>
+      <symbol id="ic-cart" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1.4"/><circle cx="18" cy="21" r="1.4"/><path d="M1 1h3l2.6 13a2 2 0 0 0 2 1.6h8.7a2 2 0 0 0 2-1.5L23 6H6"/></symbol>
+      <symbol id="ic-bell" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></symbol>
+      <symbol id="ic-plus" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+      <symbol id="ic-minus" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+      <symbol id="ic-trash" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></symbol>
+      <symbol id="ic-tag" viewBox="0 0 24 24"><path d="M20.6 13.4 12 22l-9-9V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.2" fill="currentColor" stroke="none"/></symbol>
+    </defs>
+  </svg>
+  <div class="page">
+    <div class="container">
+      <!-- ===== Navbar (shared across all 5 screens) ===== -->
+      <nav class="nav">
+        <div class="brand"><img src="{% static 'restaurant/img/logo-p.png' %}" alt="" class="brand-logo">PENGU<span>EATS</span></div>
+        <ul class="nav-links">
+          <li><a href="{% url 'restaurant:home' %}" class="{% if active == 'home' %}active{% endif %}">HOME</a></li>
+          <li><a href="{% url 'restaurant:about' %}" class="{% if active == 'about' %}active{% endif %}">ABOUT</a></li>
+          <li><a href="{% url 'restaurant:recipes' %}" class="{% if active == 'recipes' %}active{% endif %}">RECIPES</a></li>
+          <li><a href="{% url 'restaurant:blog' %}" class="{% if active == 'blog' %}active{% endif %}">BLOG</a></li>
+          <li><a href="{% url 'restaurant:contact' %}" class="{% if active == 'contact' %}active{% endif %}">CONTACT</a></li>
+        </ul>
+        <div class="nav-right">
+          <form class="search" method="get" action="{% url 'restaurant:recipes' %}" role="search">
+            <button type="submit" class="search-btn" aria-label="Search"><svg class="ic"><use href="#ic-search"></use></svg></button>
+            <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Search recipes...">
+          </form>
+          <!-- Customer basket — badge shows how many dishes are queued up. -->
+          <a href="{% url 'restaurant:cart' %}" class="cart-link {% if active == 'cart' %}active{% endif %}" aria-label="Basket">
+            <svg class="ic"><use href="#ic-cart"></use></svg>
+            {% if cart_count %}<span class="cart-badge">{{ cart_count }}</span>{% endif %}
+          </a>
+          <!-- Pingu's private management console (owner-only). The dashboard is
+               gated by @login_required, so we only show it once signed in. -->
+          {% if user.is_authenticated %}
+            <a href="{% url 'restaurant:dashboard' %}" class="owner-btn {% if active == 'dashboard' %}active{% endif %}"><svg class="ic"><use href="#ic-grid"></use></svg>Dashboard</a>
+            <form method="post" action="{% url 'restaurant:logout' %}" style="margin:0;">
+              {% csrf_token %}
+              <button type="submit" class="owner-btn ghost"><svg class="ic"><use href="#ic-user"></use></svg>Log out</button>
+            </form>
+          {% else %}
+            <a href="{% url 'restaurant:login' %}" class="owner-btn {% if active == 'login' %}active{% endif %}"><svg class="ic"><use href="#ic-user"></use></svg>Owner Login</a>
+          {% endif %}
+        </div>
+      </nav>
+
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+
+  <!-- ===== Footer (shared) ===== -->
+  <footer class="footer container">
+    <div>
+      <div class="brand" style="font-size:24px;font-family:Quicksand;font-weight:700;"><img src="{% static 'restaurant/img/logo-p.png' %}" alt="" class="brand-logo">PENGU<span style="color:var(--orange)">EATS</span></div>
+      <p style="font-size:13px;max-width:240px;margin-top:12px;">Unlock a world of variety culinary recipes and unleash your inner chef the easy way with PenguEats.</p>
+    </div>
+    <div><h4>Explore</h4><a href="{% url 'restaurant:home' %}">Home</a><a href="{% url 'restaurant:recipes' %}">Recipes</a><a href="{% url 'restaurant:about' %}">About</a><a href="{% url 'restaurant:blog' %}">Blog</a></div>
+    <div><h4>Company</h4><a href="#">Our Story</a><a href="#">Careers</a><a href="#">Press</a><a href="{% url 'restaurant:contact' %}">Contact</a></div>
+    <div><h4>Connect</h4><a href="#">Twitter</a><a href="#">Instagram</a><a href="#">Facebook</a><a href="#">LinkedIn</a></div>
+  </footer>
+</body>
+</html>

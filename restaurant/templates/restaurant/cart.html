@@ -1,0 +1,64 @@
+{% extends "restaurant/base.html" %}
+{% comment %}
+  The customer's basket. Quantities and the running total reflect live,
+  freshness-adjusted prices (Recipe.current_price), so a markdown shows up here
+  automatically. Checkout hands off to Stripe.
+{% endcomment %}
+{% block title %}Your Basket — PenguEats{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="row-head">
+    <h2>Your <span class="accent">Basket</span> <svg class="ic"><use href="#ic-cart"></use></svg></h2>
+    <a href="{% url 'restaurant:recipes' %}" class="owner-btn ghost"><svg class="ic"><use href="#ic-utensils"></use></svg>Keep browsing</a>
+  </div>
+
+  {% if messages %}
+    <div class="flash">
+      {% for m in messages %}
+        <div class="flash-item {% if m.tags == 'error' %}flash-bad{% else %}flash-ok{% endif %}">{{ m }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% if rows %}
+  <div class="panel">
+    <div class="cart-table">
+      {% for row in rows %}
+      <div class="cart-row">
+        <img class="cart-thumb" src="{{ row.recipe.display_image }}" alt="{{ row.recipe.name }}">
+        <div class="cart-info">
+          <a href="{% url 'restaurant:recipe_detail' row.recipe.slug %}" class="cart-name">{{ row.recipe.name }}</a>
+          <div class="cart-unit">
+            ${{ row.unit_price }} each
+            {% if row.recipe.is_discounted %}<span class="deal-tag sm"><svg class="ic"><use href="#ic-tag"></use></svg>{{ row.recipe.freshness_deal_label }}</span>{% endif %}
+          </div>
+        </div>
+        <form method="post" action="{% url 'restaurant:update_cart' row.recipe.pk %}" class="cart-qty">
+          {% csrf_token %}
+          <input type="number" name="quantity" value="{{ row.quantity }}" min="0" max="50" aria-label="Quantity">
+          <button type="submit" class="act-btn sm ghost">Update</button>
+        </form>
+        <div class="cart-line-total">${{ row.line_total }}</div>
+        <form method="post" action="{% url 'restaurant:remove_from_cart' row.recipe.pk %}" style="margin:0;">
+          {% csrf_token %}
+          <button type="submit" class="icon-btn danger" aria-label="Remove"><svg class="ic"><use href="#ic-trash"></use></svg></button>
+        </form>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="cart-foot">
+      <div class="cart-total-label">Total <span class="cart-total">${{ cart_total }}</span></div>
+      <a href="{% url 'restaurant:checkout' %}" class="act-btn"><svg class="ic"><use href="#ic-dollar"></use></svg>Checkout</a>
+    </div>
+  </div>
+  {% else %}
+  <div class="panel empty-state">
+    <svg class="ic big"><use href="#ic-cart"></use></svg>
+    <p>Your basket is empty.</p>
+    <a href="{% url 'restaurant:recipes' %}" class="act-btn">Browse the menu</a>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

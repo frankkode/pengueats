@@ -1,0 +1,62 @@
+{% extends "restaurant/base.html" %}
+{% load static %}
+{% block title %}Our Menu — PenguEats{% endblock %}
+
+{% block content %}
+{% comment %}
+  A printable, take-away price menu. The "Save as PDF" button opens the
+  browser's print dialog (Print → Destination: Save as PDF). Print-only CSS
+  hides the site chrome so just the menu lands on the page. Freshness deals are
+  shown so today's markdowns appear on the printout.
+{% endcomment %}
+
+<section class="section menu-page">
+  <div class="menu-paper">
+    <div class="menu-masthead">
+      <img src="{% static 'restaurant/img/logo-p.png' %}" alt="" class="menu-logo">
+      <h1>PenguEats <span class="accent">Menu</span></h1>
+      <p class="menu-tagline">Caught fresh from the ice · cooked to order</p>
+      <div class="menu-actions no-print">
+        <button type="button" class="btn btn-dark" onclick="window.print()">
+          <svg class="ic"><use href="#ic-download"></use></svg> Save as PDF / Print
+        </button>
+        <a class="btn btn-light" href="{% url 'restaurant:recipes' %}">Browse &amp; order online</a>
+      </div>
+    </div>
+
+    {% for group in groups %}
+    <div class="menu-group">
+      <h2 class="menu-cat">{{ group.label }}</h2>
+      <ul class="menu-list">
+        {% for r in group.items %}
+        <li class="menu-item">
+          <div class="menu-item-main">
+            <span class="menu-item-name">
+              {{ r.name }}
+              {% if r.is_discounted %}<span class="menu-deal"><svg class="ic"><use href="#ic-tag"></use></svg>-{{ r.discount_pct }}%</span>{% endif %}
+            </span>
+            {% if r.summary %}<span class="menu-item-desc">{{ r.summary }}</span>{% endif %}
+          </div>
+          <span class="menu-dots" aria-hidden="true"></span>
+          <span class="menu-item-price">
+            {% if r.is_discounted %}
+              <span class="menu-price-now">${{ r.current_price }}</span>
+              <span class="menu-price-was">${{ r.price }}</span>
+            {% else %}
+              <span class="menu-price-now">${{ r.price }}</span>
+            {% endif %}
+          </span>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% empty %}
+    <p>The menu is being written up — check back shortly.</p>
+    {% endfor %}
+
+    <div class="menu-foot">
+      <p>Prices in USD. Freshness deals change daily with the day's catch.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}
