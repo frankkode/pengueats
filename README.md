@@ -1,5 +1,5 @@
 # PenguEats — Pingu's Fish Restaurant Platform
-[Owner (Penguin)](docs/screenshots/00.png.png)
+![Owner (Penguin)](docs/screenshots/00.png.png)
 
 A full-stack **Django 5** web application built for the *DLBFTPPP01 — Project
 Programming with Python* oral project report. Pingu the penguin runs a fish
@@ -122,7 +122,6 @@ the business logic in `services.py`:
 | 6 | `test_freshness_markdown_reduces_price` | Freshness-based dynamic pricing marks a dish down (Good −15%, Use-soon −30%). |
 | 7 | `test_online_order_only_counts_and_deducts_once_paid` | A web order is invisible to revenue/inventory until paid, and `finalize_paid_order` is **idempotent** (no double-deduct). |
 
-> Screenshot of this run: `docs/screenshots/11-tests.png` (see Screenshots above).
 
 ## What maps to the task brief
 | Brief requirement              | Where it lives                                            |
@@ -185,4 +184,4 @@ docs/screenshots/           # <- put your README screenshots here
   on small screens using `data-label` attributes + CSS `::before`, so nothing
   overflows on a phone.
 
-  [PenguEats — CI & Railway deploy pipeline](docs/screenshots/00-deploy.svg)
+  ![PenguEats — CI & Railway deploy pipeline](docs/screenshots/00-deploy.svg)
