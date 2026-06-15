@@ -1,11 +1,18 @@
-# PenguEats — Pingu's Fish Restaurant Platform 
+# PenguEats — Pingu's Fish Restaurant Platform
+
 [Live App](https://pingu.up.railway.app/)
 
-### Admin Login
-Username: pingu
-Password: School2026
 
-![Owner (Penguin)](docs/screenshots/00.png)
+### Admin Login
+### Username: pingu
+
+### Password: School2026
+
+<p align="center">
+
+![Owner (Penguin)](docs/screenshots/pingu.png)
+
+</p>
 
 A full-stack **Django 5** web application built for the *DLBFTPPP01 — Project
 Programming with Python* oral project report. Pingu the penguin runs a fish
