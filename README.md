@@ -8,11 +8,15 @@
 
 ### Password: School2026
 
-<p align="center">
+<table align="center">
+  <tr>
+    <td width="300" height="300" align="center">
 
 ![Owner (Penguin)](docs/screenshots/pingu.png)
 
-</p>
+</td>
+  </tr>
+</table>
 
 A full-stack **Django 5** web application built for the *DLBFTPPP01 — Project
 Programming with Python* oral project report. Pingu the penguin runs a fish
